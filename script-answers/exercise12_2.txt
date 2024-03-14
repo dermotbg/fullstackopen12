@@ -1,0 +1,7 @@
+script exercise12_2.txt
+Script started, output log file is 'exercise12_2.txt'.
+dermot@dermotbg-nobara-pc:~/Desktop/repos/fullstackopen12/part12-containers-applications/script-answers$ docker container run -it ubuntu bash
+root@d20139386038:/# mkdir /usr/src/app
+root@d20139386038:/# touch /usr/src/app/index.js
+root@d20139386038:/# exit
+exit
