@@ -1,10 +1,45 @@
 version: '3.8'
 
 services:
-  image: flashcard-frontend-dev
-  container_name: flashcard-frontend-dev
-  build:
-    context: ./frontend
-    dockerfile: dev.Dockerfile
-  volumes:
-      - ./:/usr/src/app
+  frontend:
+    image: flashcards-frontend-dev
+    container_name: flashcards-frontend-dev
+    build:
+      context: ./frontend
+      dockerfile: dev.Dockerfile
+    ports:
+      - 5173:5173
+    volumes:
+        - ./:/usr/src/app/frontend
+
+  backend:
+    image: flashcards-backend-dev
+    container_name: flashcards-backend-dev
+    build:
+      context: ./backend
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./:/usr/src/app/backend
+    environment:
+      - MDB_URI=${MDB_URI}
+
+  mongo:
+    image: mongo
+    container_name: mongodb-dev
+    ports:
+      - 3456:27017
+    volumes:
+      - ./mongo_data:/data/db
+
+  nginx:
+    image: nginx:1.20.1
+    volumes:
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:80
+    container_name: reverse-proxy
+    depends_on:
+      - frontend
+
+volumes:
+  mongo_data:

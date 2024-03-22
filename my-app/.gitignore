@@ -15,6 +15,7 @@ dist-ssr
 *.rest
 requests/
 mongo.js 
+/mongo_data
 
 # Editor directories and files
 .vscode/*
