@@ -2,20 +2,20 @@ version: '3.8'
 
 services:
   frontend:
-    image: flashcards-frontend-dev
-    container_name: flashcards-frontend-dev
+    image: flashcards-frontend-prod
+    container_name: flashcards-frontend-prod
     build:
       context: ./frontend
-      dockerfile: dev.Dockerfile
+      dockerfile: Dockerfile
     volumes:
-        - ./:/usr/src/app/frontend
+        - frontend_build:/var/www
 
   backend:
-    image: flashcards-backend-dev
-    container_name: flashcards-backend-dev
+    image: flashcards-backend-prod
+    container_name: flashcards-backend-prod
     build:
       context: ./backend
-      dockerfile: dev.Dockerfile
+      dockerfile: Dockerfile
     volumes:
       - ./:/usr/src/app/backend
     environment:
@@ -23,7 +23,7 @@ services:
 
   mongo:
     image: mongo
-    container_name: mongodb-dev
+    container_name: mongodb-prod
     ports:
       - 3456:27017
     volumes:
@@ -32,7 +32,8 @@ services:
   nginx:
     image: nginx:1.20.1
     volumes:
-      - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - frontend_build:/usr/share/nginx/html
     ports:
       - 8080:80
     container_name: reverse-proxy
@@ -40,4 +41,5 @@ services:
       - frontend
 
 volumes:
+  frontend_build:
   mongo_data:
