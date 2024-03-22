@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: todo-frontend-prod
+    container_name: todo-frontend-prod
+    build:
+      context: ./todo-frontend
+      dockerfile: Dockerfile
+    volumes:
+      - frontend_build:/var/www
+
+
+  backend:
+    image: todo-backend-prod
+    build: 
+      context: ./todo-backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./todo-backend:/usr/src/app
+    container_name: todo-backend-prod
+    environment:
+      - MONGO_URL=${MONGO_PROD}
+      - REDIS_URL=redis://redis
+    depends_on:
+      - nginx
+      - mongo
+      - redis
+
+  mongo:
+    image: mongo
+    container_name: mongodb-prod
+    ports:
+      - 3456:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - ./todo-backend/mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - ./todo-backend/mongo_data:/data/db
+
+  redis:
+    image: redis
+    container_name: redis-prod
+    ports:
+      - 6379:6379
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes: 
+      - ./todo-backend/redis_data:/data
+  
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - frontend_build:/usr/share/nginx/html
+    ports:
+      - 8080:80
+    container_name: reverse-proxy
+    depends_on:
+      - frontend
+    
+volumes:
+  frontend_build:
+  mongo_data:
+  redis_data:

@@ -1,29 +1,21 @@
 #  build / base stage
-FROM node:16 AS base
+FROM node:16 AS build-stage
 
 WORKDIR /usr/src/app
 
 COPY . .
 
-ENV REACT_APP_BACKEND_URL=http://localhost:3000
-
-RUN npm ci 
-
-RUN npm run build
-
-# Test stage
-FROM base AS test
-
 RUN npm ci
 
-COPY --from=base /usr/src/app/build .
+# Test stage
+FROM build-stage AS test-stage
 
 RUN CI=true npm test
 
+RUN env REACT_APP_BACKEND_URL=http://localhost:8080/api npm run build
+
 #  serve stage
-FROM nginx:1.20-alpine
 
-COPY --from=test /usr/src/app/build /usr/share/nginx/html
+FROM nginx AS serve-stage
 
-# FE runs on port 3001
-# start with: docker run -p 3001:80 -it todo-frontend
+COPY --from=build-stage /usr/src/app/build /var/www
